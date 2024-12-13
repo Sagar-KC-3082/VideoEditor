@@ -15,7 +15,9 @@ final textProvider = StateProvider<String>((ref) => 'Default Text');
 final offsetProvider = StateProvider<Offset>((ref) => const Offset(0, 0));
 
 class DraggableTextWidget extends ConsumerStatefulWidget {
-  const DraggableTextWidget({super.key});
+  const DraggableTextWidget({
+    super.key,
+  });
 
   @override
   ConsumerState<DraggableTextWidget> createState() =>
@@ -62,11 +64,15 @@ class _DraggableTextWidgetState extends ConsumerState<DraggableTextWidget> {
             );
           });
 
-          final Offset? position = _renderBox?.localToGlobal(Offset.zero);
+          final Offset? position = _renderBox?.localToGlobal(
+            Offset.zero,
+          );
           ref.read(offsetProvider.notifier).state = Offset(
             position?.dx ?? 50.0,
             position?.dy ?? 50.0,
           );
+          print(
+              'hehehe height  ${ref.read(offsetProvider).dy} -->  ${ref.read(offsetProvider).dx}');
         },
         child: Container(
           key: _containerKey,

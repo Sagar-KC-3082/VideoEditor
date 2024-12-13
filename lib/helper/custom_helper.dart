@@ -217,6 +217,8 @@ class CustomHelper {
       }
       if (verticalPercentage >= 50) {
         verticalPercentage += 3;
+      }else{
+        verticalPercentage += 1;
       }
 
       final command =

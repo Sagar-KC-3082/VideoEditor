@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -38,38 +39,37 @@ class _TrimmingScreenState extends ConsumerState<TrimmingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            if (_videoPath != null && _controller.initialized)
-              Expanded(
-                child: Column(
-                  children: [
-                    const SizedBox(height: 16),
-                    Expanded(
-                      child: Center(
-                        child: Stack(
-                          key: _stackKey,
-                          children: [
-                            CropGridViewer.preview(
-                              controller: _controller,
-                            ),
-                            if (_showTextSection) const DraggableTextWidget(),
-                          ],
-                        ),
+        child: (_videoPath != null && _controller.initialized)
+            ? Column(
+                children: [
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: Center(
+                      child: Stack(
+                        key: _stackKey,
+                        children: [
+                          CropGridViewer.preview(
+                            controller: _controller,
+                          ),
+                          if (_showTextSection) const DraggableTextWidget(),
+                        ],
                       ),
                     ),
-                    _playPauseIcon(),
-                    _trimSlider(),
-                    const SizedBox(height: 8),
-                    _functionalityRow(),
-                  ],
-                ),
+                  ),
+                  _playPauseIcon(),
+                  _trimSlider(),
+                  const SizedBox(height: 8),
+                  _functionalityRow(),
+                  _uploadVideo(),
+                ],
+              )
+            : Column(
+                children: [
+                  const Spacer(),
+                  _uploadVideo(),
+                  const Spacer(),
+                ],
               ),
-            _uploadVideo(),
-          ],
-        ),
       ),
     );
   }
@@ -118,32 +118,32 @@ class _TrimmingScreenState extends ConsumerState<TrimmingScreen> {
             icon: Icons.save_alt,
             onTap: () async {
               if (_showTextSection) {
-                  final RenderBox renderBox =
-                      _stackKey.currentContext?.findRenderObject() as RenderBox;
-                  final Offset position = renderBox.localToGlobal(Offset.zero);
-                  final double height = renderBox.size.height + position.dy;
-                  final double width = renderBox.size.width + position.dx;
+                final RenderBox renderBox =
+                    _stackKey.currentContext?.findRenderObject() as RenderBox;
+                final Offset position = renderBox.localToGlobal(Offset.zero);
+                final double height = renderBox.size.height;
+                final double width = renderBox.size.width;
+                print('Stack height : $height');
+                print('Stack width: $width');
 
-                  print('Stack height : $height');
-                  print('Stack width: $width');
+                print('Video height dy: ${renderBox.size.height}');
+                print('Stack height dy: ${position.dy}');
+                print('Stack width dx: ${position.dx}');
 
-                  print('Stack width dx: ${position.dx}');
-                  print('Stack width: ${renderBox.size.width}');
+                final containerHeight = ref.read(offsetProvider).dy;
+                final containerWidth = ref.read(offsetProvider).dx;
+                print('Container startPosition height: $containerHeight');
+                print('Container startPosition width: $containerWidth');
 
-                  final containerHeight = ref.read(offsetProvider).dy;
-                  final containerWidth = ref.read(offsetProvider).dx;
-                  print('Container startPosition height: $containerHeight');
-                  print('Container startPosition width: $containerWidth');
+                ref.read(horizontalPercentageProvider.notifier).state =
+                    (((containerWidth - position.dx) / width) * 100).toInt();
+                ref.read(verticalPercentageProvider.notifier).state =
+                    (((containerHeight - position.dy) / height) * 100).toInt();
 
-                  ref.read(horizontalPercentageProvider.notifier).state =
-                      ((containerWidth / width) * 100).toInt();
-                  ref.read(verticalPercentageProvider.notifier).state =
-                      ((containerHeight / height) * 100).toInt();
-
-                  print(
-                      'final horizontal percentage : ${ref.read(horizontalPercentageProvider.notifier).state}');
-                  print(
-                      'final vertical percentage : ${ref.read(verticalPercentageProvider.notifier).state}');
+                print(
+                    'final horizontal percentage : ${ref.read(horizontalPercentageProvider.notifier).state}');
+                print(
+                    'final vertical percentage : ${ref.read(verticalPercentageProvider.notifier).state}');
               }
 
               await _saveVideo();
